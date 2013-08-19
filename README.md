@@ -7,10 +7,14 @@ An async framework for Lua/Torch, based on [LibUV](https://github.com/joyent/lib
 TODO
 ----
 
+Features:
 * async.spawn() : spawn a child process, with control over stdin,out,err
 * async.exec() : spawn a child process, just read out stdout in one block, when complete
 * async.getAddrInfo() : get addr info (DNS) - requires wrapping `uv_getaddrinfo`
 * async.http.listen/connect : http server and client (simple using `http_parser`)
+
+Bugs:
+* fs.close() : is not working?
 
 License
 -------
