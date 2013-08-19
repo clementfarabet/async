@@ -24,6 +24,6 @@ build = {
    build_command = "cd luv; $(MAKE)",
    install_command = [[
 cp async.lua $(LUADIR)/
-cp luv.so $(LIBDIR)/
+cp luv.so lhttp_parser.so $(LIBDIR)/
    ]]
 }
