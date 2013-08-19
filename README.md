@@ -1,7 +1,7 @@
 ASyNC
 =====
 
-An async framework for Torch, based on [LibUV](https://github.com/joyent/libuv)
+An async framework for Lua/Torch, based on [LibUV](https://github.com/joyent/libuv)
 (using Tim Caswell's [luv](https://github.com/creationix/luv) library).
 
 TODO
