@@ -91,6 +91,9 @@ setmetatable(repl, {
 
 -- repl server:
 function repl.listen(domain)
+   -- bind io
+   bindio()
+
    -- prompt
    local prompt = 'remote> '
    if type(domain) == 'table' and domain.prompt then
