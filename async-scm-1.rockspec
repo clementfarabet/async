@@ -21,7 +21,7 @@ dependencies = {
 
 build = {
    type = "command",
-   build_command = "",
+   build_command = "cd luv; $(MAKE)",
    install_command = [[
 cp async.lua $(LUADIR)/
 cp luv.so $(LIBDIR)/
