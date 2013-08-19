@@ -1,4 +1,4 @@
-local async = dofile('async.lua')
+local async = require 'async'
 
 async.json.listen({host='0.0.0.0', port=8483}, function(req,res)
    print('request:',req)

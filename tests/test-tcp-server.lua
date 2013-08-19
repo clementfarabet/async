@@ -1,4 +1,4 @@
-local async = dofile('async.lua')
+local async = require 'async'
 
 local server = async.tcp.listen({host='0.0.0.0', port=8483}, function(client)
    client.ondata(function(data)

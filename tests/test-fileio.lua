@@ -1,4 +1,4 @@
-local async = dofile('async.lua')
+local async = require 'async'
 
 async.fs.readFile('test-fileio.lua', function(file)
    print(file)
