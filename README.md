@@ -4,6 +4,14 @@ ASyNC
 An async framework for Torch, based on [LibUV](https://github.com/joyent/libuv)
 (using Tim Caswell's [luv](https://github.com/creationix/luv) library).
 
+TODO
+----
+
+* async.spawn() : spawn a child process, with control over stdin,out,err
+* async.exec() : spawn a child process, just read out stdout in one block, when complete
+* async.getAddrInfo() : get addr info (DNS) - requires wrapping `uv_getaddrinfo`
+* async.http.listen/connect : http server and client (simple using `http_parser`)
+
 License
 -------
 
@@ -24,6 +32,11 @@ live control of your programs:
 
 ```lua
 async.repl()  -- fires up an asyncronous repl
+```
+
+```lua
+async.repl.listen({host='0.0.0.0', port=8080})   -- fires up an async repl through a TCP server
+async.repl.connect({host='0.0.0.0', port=8080})  -- connects to a remote repl through a TCP client
 ```
 
 Common JS like timer controls:
