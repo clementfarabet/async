@@ -14,5 +14,5 @@ return {
    repl = require('async.repl'),
    fs = require('async.fs'),
    json = require('async.json'),
-   parseUrl = require('async.http'),
+   http = require('async.http'),
 }
