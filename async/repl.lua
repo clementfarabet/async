@@ -92,7 +92,10 @@ setmetatable(repl, {
 -- repl server:
 function repl.listen(domain)
    -- prompt
-   local prompt = domain.prompt or 'remote> '
+   local prompt = 'remote> '
+   if type(domain) == 'table' and domain.prompt then
+      prompt = domain.prompt
+   end
 
    -- list of connected clients, to mirror:
    local clients = {}
