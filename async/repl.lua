@@ -91,9 +91,6 @@ setmetatable(repl, {
 
 -- repl server:
 function repl.listen(domain)
-   -- bind io
-   bindio()
-
    -- prompt
    local prompt = 'remote> '
    if type(domain) == 'table' and domain.prompt then
@@ -114,8 +111,7 @@ function repl.listen(domain)
    -- listen:
    tcp.listen(domain, function(client)
       -- wait for remote commands:
-      client.ondata(function(data)
-         --iowrite(data)
+      client.onsplitdata('\n', function(data)
          eval(data)
          client.write(prompt)
       end)

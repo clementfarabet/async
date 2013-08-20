@@ -10,25 +10,18 @@ local tcp = require 'async.tcp'
 -- is a table, serialized as a JSON string. Each JSON string
 -- is separated by a \0. See examples.
 local _,json = pcall(require,'cjson')
-pcall(require,'pl')
 
 function json.listen(domain, cb)
    tcp.listen(domain, function(client)
-      local fullpacket = {}
-      client.ondata(function(chunk)
-         local chunks = stringx.split(chunk,'\0')
-         for i,chunk in ipairs(chunks) do
-            table.insert(fullpacket,chunk)
-            if i < #chunks then
-               local req = table.concat(fullpacket)
-               req = json.decode(req)
-               fullpacket = {}
-               cb(req, function(res)
-                  res = json.encode(res) .. '\0'
-                  client.write(res)
-               end)
-            end
-         end
+      client.onsplitdata('\0', function(req)
+         -- decode json:
+         req = json.decode(req)
+
+         -- call user handle:
+         cb(req, function(res)
+            res = json.encode(res) .. '\0'
+            client.write(res)
+         end)
       end)
    end)
 end
@@ -43,19 +36,13 @@ function json.connect(domain, cb)
       client.receive = function(f)
          receive = f
       end
-      local fullpacket = {}
-      client.ondata(function(chunk)
-         local chunks = stringx.split(chunk,'\0')
-         for i,chunk in ipairs(chunks) do
-            table.insert(fullpacket,chunk)
-            if i < #chunks then
-               local req = table.concat(fullpacket)
-               req = json.decode(req)
-               fullpacket = {}
-               if receive then
-                  receive(req)
-               end
-            end
+      client.onsplitdata('\0', function(req)
+         -- decode json:
+         req = json.decode(req)
+
+         -- call user receive function:
+         if receive then
+            receive(req)
          end
       end)
       cb(client)
