@@ -8,5 +8,4 @@ async.process.spawn('th', {'-e','"while true do a=1 end"'}, function(process)
    process.kill()
 end)
 
-async.repl()
 async.go()

@@ -16,7 +16,7 @@ function process.spawn(path, args, handler)
    local pid = sys.execute(cmd)
 
    -- fake client for now
-   local client, cbonclose
+   local client, cbonclose, cbondata
    client = {
       kill = function(code)
          code = code or 9
@@ -26,11 +26,28 @@ function process.spawn(path, args, handler)
       onclose = function(f)
          cbonclose = f
       end,
+      ondata = function(f)
+         cbondata = f
+      end,
       pid = pid,
    }
 
    -- Hanldler
    handler(client)
+end
+
+-- Exec
+function process.exec(path, args, callback)
+   -- Spawn:
+   process.spawn(path, args, function(handler)
+      local result = {}
+      handler.ondata(function(chunk)
+         table.insert(result,chunk)
+      end)
+      handler.onclose(function(status)
+         callback(result,status)
+      end)
+   end)
 end
 
 -- Process lib

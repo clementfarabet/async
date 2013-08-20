@@ -5,7 +5,7 @@ return {
    setTimeout = require('async.time').setTimeout,
    uv = require('luv'),
    go = function()
-      require('luv').run('once')
+      require('luv').run('default')
    end,
    cpuInfo = require('luv').cpuInfo,
    hrtime = require('luv').hrtime,
