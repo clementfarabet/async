@@ -15,4 +15,5 @@ return {
    fs = require('async.fs'),
    json = require('async.json'),
    http = require('async.http'),
+   process = require('async.process')
 }
