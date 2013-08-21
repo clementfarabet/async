@@ -16,18 +16,19 @@ function process.spawn(path, args, handler)
    local pid = sys.execute(cmd)
 
    -- fake client for now
-   local client, cbonclose, cbondata
+   local client, cbonend
    client = {
       kill = function(code)
          code = code or 9
          os.execute('kill -' .. code .. ' ' .. pid)
-         if cbonclose then cbonclose() end
+         if cbonend then cbonend(0) end
       end,
-      onclose = function(f)
-         cbonclose = f
+      onend = function(f)
+         cbonend = f
       end,
       ondata = function(f)
-         cbondata = f
+      end,
+      onerr = function(f)
       end,
       pid = pid,
    }
