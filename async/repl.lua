@@ -181,9 +181,16 @@ repl.colors = {
    _cyan = '\27[46m',
    _white = '\27[47m'
 }
-function repl.colorize(str,color)
+function colorize(str,color)
    return repl.colors[color] .. str .. repl.colors.none
 end
+local short = {}
+for color in pairs(repl.colors) do
+   short[color] = function(str)
+      return colorize(str,color)
+   end
+end
+repl.colorize = short
 
 -- return 
 return repl
