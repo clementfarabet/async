@@ -91,7 +91,7 @@ setmetatable(repl, {
 })
 
 -- repl server:
-function repl.listen(domain)
+function repl.listen(domain, callback)
    -- prompt
    local prompt
    if type(domain) == 'table' and domain.prompt then
@@ -134,11 +134,16 @@ function repl.listen(domain)
 
       -- prompt:
       client.write(prompt)
+
+      -- user callback
+      if callback then
+         callback(client)
+      end
    end)
 end
 
 -- repl client:
-function repl.connect(domain)
+function repl.connect(domain, callback)
    -- bind io
    bindio()
 
@@ -158,6 +163,11 @@ function repl.connect(domain)
       stdin.onend(function()
          os.exit()
       end)
+
+      -- user callback
+      if callback then
+         callback(client)
+      end
    end)
 end
 
