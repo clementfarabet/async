@@ -37,6 +37,7 @@ local function bindio()
       repl.stderr = stderr
    end
 end
+repl.bindio = bindio
 
 -- Eval:
 local function eval(str)
