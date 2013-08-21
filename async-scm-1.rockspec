@@ -2,7 +2,7 @@ package = "async"
 version = "scm-1"
 
 source = {
-   url = "git://github.com/madbits/async",
+   url = "git://github.com/clementfarabet/async",
    dir = "async"
 }
 
@@ -11,7 +11,7 @@ description = {
    detailed = [[
 Async framework for Torch, based on LibUV.
    ]],
-   homepage = "https://github.com/madbits/async",
+   homepage = "https://github.com/clementfarabet/async",
    license = "BSD"
 }
 
