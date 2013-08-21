@@ -92,7 +92,7 @@ setmetatable(repl, {
 -- repl server:
 function repl.listen(domain)
    -- prompt
-   local prompt = 'remote> '
+   local prompt
    if type(domain) == 'table' and domain.prompt then
       prompt = domain.prompt
    end
@@ -110,6 +110,10 @@ function repl.listen(domain)
 
    -- listen:
    tcp.listen(domain, function(client)
+      -- prompt:
+      local s = client.sockname
+      prompt = prompt or (s.address..':'..s.port..'> ')
+
       -- wait for remote commands:
       client.onsplitdata('\n', function(data)
          eval(data)
