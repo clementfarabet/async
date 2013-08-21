@@ -4,6 +4,11 @@ ASyNC
 An async framework for Lua/Torch, based on [LibUV](https://github.com/joyent/libuv)
 (using Tim Caswell's [luv](https://github.com/creationix/luv) library).
 
+This lib is heavily inspired on the Node.js architecture. It's fun, elegant, and
+should be extremely efficient (a lot of testing is required).
+
+The examples in `tests/` should provide enough documentation on the API.
+
 TODO
 ----
 
@@ -12,9 +17,6 @@ Features:
 * async.exec() : spawn a child process, just read out stdout in one block, when complete
 * async.getAddrInfo() : get addr info (DNS) - requires wrapping `uv_getaddrinfo`
 * async.http.listen/connect : http server and client (simple using `http_parser`)
-
-Bugs:
-* fs.close() : is not working?
 
 License
 -------
