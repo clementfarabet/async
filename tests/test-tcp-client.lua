@@ -1,6 +1,7 @@
 local async = require 'async'
 
 local client = async.tcp.connect('tcp://127.0.0.1:8483/', function(client)
+   print('new connection:',client)
    client.ondata(function(data)
       print('received:',data)
    end)

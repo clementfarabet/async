@@ -1,6 +1,7 @@
 local async = require 'async'
 
 local server = async.tcp.listen({host='0.0.0.0', port=8483}, function(client)
+   print('new connection:',client)
    client.ondata(function(data)
       print('received:',data)
       client.write(data)
