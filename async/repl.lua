@@ -114,6 +114,9 @@ function repl.listen(domain)
       local s = client.sockname
       prompt = prompt or (s.address..':'..s.port..'> ')
 
+      -- verbose:
+      io.write(prompt .. 'remote client @ ' .. client.peername.address..':'..client.peername.port..'\n')
+
       -- wait for remote commands:
       client.onsplitdata('\n', function(data)
          eval(data)
@@ -147,7 +150,7 @@ function repl.connect(domain)
 
       -- capture stdin:
       stdin.ondata(function(line)
-         client.write(line)
+         client.write(' '..line)
       end)
 
       -- terminate:
