@@ -8,6 +8,7 @@ local function handle(client)
       client.ondata = function(self,data)
          if cb then cb(data) end
       end
+      uv.read_start(client)
    end
    h.onend = function(cb)
       client.onend = function(self)

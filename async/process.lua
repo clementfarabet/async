@@ -9,44 +9,49 @@ local process = {}
 
 -- Spawn
 function process.spawn(path, args, handler)
-   -- TODO: bind actual uv_spawn call
-   -- this is temporary crap...
-   local cmd = path .. ' ' .. table.concat(args, ' ') .. ' & \n echo $!'
-   require 'sys'
-   local pid = sys.execute(cmd)
+   -- spawn process:
+   local h, stdin, stdout, stderr, pid = uv.spawn(path, args)
 
-   -- fake client for now
-   local client, cbonend
-   client = {
+   -- handlify pipes:
+   stdin = handle(stdin)
+   stdout = handle(stdout)
+   stderr = handle(stderr)
+
+   -- package client:
+   local client = {
       kill = function(code)
-         code = code or 9
+         code = code or 15 
          os.execute('kill -' .. code .. ' ' .. pid)
-         if cbonend then cbonend(0) end
       end,
-      onend = function(f)
-         cbonend = f
-      end,
-      ondata = function(f)
-      end,
-      onerr = function(f)
+      onexit = function(cb)
+         h.onexit = function(self,status,signal)
+            if cb then cb(status,signal) end
+         end
       end,
       pid = pid,
+      stdin = stdin,
+      stdout = stdout,
+      stderr = stderr,
    }
 
-   -- Hanldler
+   -- Handler
    handler(client)
+
+   -- return client
+   return client
 end
 
 -- Exec
 function process.exec(path, args, callback)
    -- Spawn:
-   process.spawn(path, args, function(handler)
+   process.spawn(path, args, function(process)
       local result = {}
-      handler.ondata(function(chunk)
+      process.stdout.ondata(function(chunk)
          table.insert(result,chunk)
       end)
-      handler.onend(function(status)
-         callback(result,status)
+      process.onexit(function(code,signal)
+         result = table.concat(result)
+         callback(result,code,signal)
       end)
    end)
 end
