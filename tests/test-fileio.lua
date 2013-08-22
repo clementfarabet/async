@@ -10,4 +10,5 @@ end)
 async.fs.stat('test-fileio.lua', function(stats)
    print(stats)
 end)
+
 async.go()

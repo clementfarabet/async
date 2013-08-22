@@ -21,7 +21,6 @@ local function bindio()
       io.stderr = uv.new_tty(2)
       io.stdout.write = uv.write
       io.stderr.write = uv.write
-      uv.read_start(io.stdin)
 
       -- handlify stds:
       stdin = handle(io.stdin)

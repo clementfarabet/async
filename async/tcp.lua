@@ -38,7 +38,6 @@ function tcp.listen(domain, cb)
       h.sockname = uv.tcp_getsockname(client)
       h.peername = uv.tcp_getpeername(client)
       cb(h)
-      uv.read_start(client)
    end
    uv.listen(server)
    return handle(server)
@@ -54,7 +53,6 @@ function tcp.connect(domain, cb)
       h.sockname = uv.tcp_getsockname(client)
       h.peername = uv.tcp_getpeername(client)
       cb(h)
-      uv.read_start(client)
    end)
    return h
 end
