@@ -17,7 +17,7 @@ async.process.exec('ls', {'-l'}, function(result, code)
    print('ls terminated with code: ' .. code)
 end)
 
-async.process.spawn('th', {'-e','for i = 1,10 do print(10) end'}, function(process)
+async.process.spawn('th', {'-e','require "sys" a = io.read("*line") print(a) for i = 1,10 do sys.sleep(1) print(10) end'}, function(process)
    print('spawned process: ' .. process.pid)
    process.stdout.ondata(function(data)
       io.write(''..process.pid.. ': ' .. data)
@@ -25,6 +25,7 @@ async.process.spawn('th', {'-e','for i = 1,10 do print(10) end'}, function(proce
    process.stderr.ondata(function(data)
       io.write(''..process.pid.. ': ' .. data)
    end)
+   process.stdin.write('go\n')
 end)
 
 async.go()
