@@ -17,7 +17,7 @@ async.process.exec('ls', {'-l'}, function(result, code)
    print('ls terminated with code: ' .. code)
 end)
 
-async.process.spawn('lua', {'-e','for i = 1,10 do print(10) end error("test error")'}, function(process)
+async.process.spawn('th', {'-e','for i = 1,10 do print(10) end'}, function(process)
    print('spawned process: ' .. process.pid)
    process.stdout.ondata(function(data)
       io.write(''..process.pid.. ': ' .. data)
