@@ -20,8 +20,8 @@ function process.spawn(path, args, handler)
    -- package client:
    local client = {
       kill = function(code)
-         code = code or 15 
-         os.execute('kill -' .. code .. ' ' .. pid)
+         code = code or 'SIGTERM'
+         uv.process_kill(h, code)
       end,
       onexit = function(cb)
          h.onexit = function(self,status,signal)
