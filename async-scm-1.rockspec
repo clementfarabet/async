@@ -21,7 +21,7 @@ dependencies = {
 
 build = {
    type = "command",
-   build_command = "cd luv; $(MAKE)",
+   build_command = "$(MAKE)",
    install_command = [[
 cp -r async $(LUADIR)/
 cp luv.so lhttp_parser.so $(LIBDIR)/
