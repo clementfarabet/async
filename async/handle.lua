@@ -86,7 +86,6 @@ local function handle(client)
    local lines = {}
    local buffer = {}
    h.readsplit = function(split)
-      split = split or '\n'
       if #lines > 0 then
          local line = lines[1]
          lines = tablex.sub(lines,2,#lines)
@@ -110,6 +109,11 @@ local function handle(client)
          break
       end
       return h.readsplit(split)
+   end
+
+   -- shortcut
+   h.readline = function()
+      return h.readsplit('\n')
    end
 
    return h
