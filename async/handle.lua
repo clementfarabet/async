@@ -46,6 +46,22 @@ local function handle(client)
          end
       end)
    end
+   -- provide a synchronous read:
+   h.read = function()
+      local data
+      local co = coroutine.running()
+      if not co then
+         print('read() can only be used within a fiber(function() client.read() end) context')
+         return nil
+      end
+      h.ondata(function(d)
+         data = d
+         coroutine.resume(co)
+      end)
+      coroutine.yield()
+      return data
+   end
+
    return h
 end
 

@@ -1,6 +1,7 @@
 -- package:
 return {
    tcp = require('async.tcp'),
+   fiber = require('async.fiber'),
    setInterval = require('async.time').setInterval,
    setTimeout = require('async.time').setTimeout,
    uv = require('luv'),
