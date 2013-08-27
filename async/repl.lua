@@ -7,6 +7,9 @@ local tcp = require 'async.tcp'
 -- handle
 local handle = require 'async.handle'
 
+-- fiber
+local fiber = require 'async.fiber'
+
 -- repl:
 local repl = {}
 
@@ -39,7 +42,7 @@ end
 repl.bindio = bindio
 
 -- Eval:
-local function eval(str)
+local function eval(str,usefiber)
    -- capture:
    local function captureResults(success, ...)
       local n = select('#', ...)
@@ -52,19 +55,40 @@ local function eval(str)
       f,err = loadstring(str, 'REPL')
    end
    if f then
-      local ok,results = captureResults(xpcall(f, debug.traceback))
-       if ok then
-          print(unpack(results))
-       else
-          print(results[1])
-       end
+      if usefiber then
+         fiber(function()
+            local ok,results = captureResults(xpcall(f, debug.traceback))
+            if ok then
+               print(unpack(results))
+            else
+               print(results[1])
+            end
+         end)
+      else
+         local ok,results = captureResults(xpcall(f, debug.traceback))
+         if ok then
+            print(unpack(results))
+         else
+            print(results[1])
+         end
+      end
    else
       print(err)
    end
 end
 
 -- repl:
-local function lrepl(self,prompt)
+local function lrepl(self,opts)
+   -- options?
+   local prompt,fiber
+   opts = opts or {}
+   if type(opts) == 'string' then
+      prompt = opts
+   else
+      fiber = opts.fiber
+      prompt = opts.prompt
+   end
+
    -- bind io
    bindio()
 
@@ -74,7 +98,7 @@ local function lrepl(self,prompt)
    
    -- capture stdin:
    stdin.ondata(function(line)
-      local res = eval(line)
+      local res = eval(line,fiber)
       stdout.write(prompt)
    end)
 
