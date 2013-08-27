@@ -95,15 +95,15 @@ local function handle(client)
          local res = h.read()
          local chunks = stringx.split(res,split)
          for i,chunk in ipairs(chunks) do
-            if i == 0 then
+            if i == #chunks then
+               table.insert(buffer,chunk)
+            elseif i == 1 then
                table.insert(buffer,chunk)
                local line = table.concat(buffer)
                table.insert(lines,line)
                buffer = {}
-            elseif i < #chunks then
-               table.insert(lines,chunk)
             else
-               table.insert(buffer,chunk)
+               table.insert(lines,chunk)
             end
          end
          break
