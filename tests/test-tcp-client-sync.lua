@@ -7,6 +7,8 @@ end
 
 local client = async.tcp.connect('tcp://127.0.0.1:8483/', function(client)
    async.fiber(function()
+      client.sync()
+
       client.write('test')
       local res = client.read()
       print('received, sync: ', res)

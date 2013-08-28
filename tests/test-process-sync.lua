@@ -4,6 +4,7 @@ async.process.spawn('th', {'-e','require "sys" a = io.read("*line") print(a) io.
    async.fiber(function()
       print('spawned process: ' .. process.pid)
       process.stdin.write('go\n')
+      process.stdout.sync()
       while true do
          local read = process.stdout.readsplit('\n')
          io.write(''..process.pid.. ': ' .. read .. '\n')

@@ -53,67 +53,101 @@ local function handle(client)
       end)
    end
 
-   -- provide a synchronous read:
-   h.read = function()
-      -- get coroutine:
-      local co = coroutine.running()
-      if not co then
-         print('read() can only be used within a fiber(function() client.read() end) context')
-         return nil
-      end
+   -- activate sync read (must be used within fiber)
+   h.sync = function()
+      -- local buffers:
+      local cos = {}
+      local data = {}
 
-      -- read data, and resume coroutine once done
-      local data
+      -- capture all data:
       h.ondata(function(d)
-         data = d
-         client.ondata = nil
-         coroutine.resume(co)
+         local ccos = cos
+         cos = {}
+         for co in pairs(ccos) do
+            data[co] = d
+            coroutine.resume(co)
+         end
       end)
 
-      -- yield...
-      coroutine.yield()
+      -- synchronous read:
+      h.read = function()
+         -- get coroutine:
+         local co = coroutine.running()
+         if not co then
+            print('read() can only be used within a fiber(function() client.read() end) context')
+            return nil
+         end
+         cos[co] = true
 
-      -- coroutine has been resumed, data is available
-      return data
-   end
+         -- yield...
+         coroutine.yield()
 
-   -- synchronous readsplit:
-   -- TODO: this function seems to be 100% correct, but given the way
-   -- it's constructed, it implies that the user really knows what he's doing:
-   -- if readsplit(split) is called with the same split symbol over and over,
-   -- then it will be ok all the time. If the split symbol changes, results will
-   -- be unpredictable, because of the buffering.
-   local lines = {}
-   local buffer = {}
-   h.readsplit = function(split)
-      if #lines > 0 then
-         local line = lines[1]
-         lines = tablex.sub(lines,2,#lines)
-         return line
+         -- coroutine has been resumed, data is available
+         local d = data[co]
+         data[co] = nil
+         return d
       end
-      while true do
-         local res = h.read()
-         local chunks = stringx.split(res,split)
-         for i,chunk in ipairs(chunks) do
-            if i == #chunks then
-               table.insert(buffer,chunk)
-            elseif i == 1 then
-               table.insert(buffer,chunk)
-               local line = table.concat(buffer)
-               table.insert(lines,line)
-               buffer = {}
-            else
-               table.insert(lines,chunk)
+
+      -- synchronous readsplit:
+      -- TODO: this function seems to be 100% correct, but given the way
+      -- it's constructed, it implies that the user really knows what he's doing:
+      -- if readsplit(split) is called with the same split symbol over and over,
+      -- then it will be ok all the time. If the split symbol changes, results will
+      -- be unpredictable, because of the buffering.
+      local lines = {}
+      local buffer = {}
+      h.readsplit = function(split)
+         -- get coroutine:
+         local co = coroutine.running()
+         if not co then
+            print('read() can only be used within a fiber(function() client.read() end) context')
+            return nil
+         end
+         lines[co] = lines[co] or {}
+         buffer[co] = buffer[co] or {}
+
+         -- lines cached?
+         if #lines[co] > 0 then
+            local line = lines[co][1]
+            lines[co] = tablex.sub(lines[co],2,#lines[co])
+            return line
+         end
+
+         -- grab next lines:
+         while true do
+            local res = h.read()
+            local chunks = stringx.split(res,split)
+            for i,chunk in ipairs(chunks) do
+               if i == #chunks then
+                  table.insert(buffer[co],chunk)
+               elseif i == 1 then
+                  table.insert(buffer[co],chunk)
+                  local line = table.concat(buffer[co])
+                  table.insert(lines[co],line)
+                  buffer[co] = {}
+               else
+                  table.insert(lines[co],chunk)
+               end
+            end
+            break
+         end
+
+         -- GC:
+         for co in pairs(lines) do
+            if coroutine.status(co) == 'dead' then
+               lines[co] = nil
+               buffer[co] = nil
             end
          end
-         break
-      end
-      return h.readsplit(split)
-   end
 
-   -- shortcut
-   h.readline = function()
-      return h.readsplit('\n')
+         -- lines are buffered, return some:
+         return h.readsplit(split)
+      end
+
+      -- shortcut
+      h.readline = function()
+         return h.readsplit('\n')
+      end
    end
 
    return h
