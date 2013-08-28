@@ -35,18 +35,55 @@ local fiber = function(func)
    return f
 end
 
+-- return context:
+local context = function()
+   local co = coroutine.running()
+   if not co or not fibers[co] then
+      print('async.fiber.current() : not currently in a managed fiber')
+      return nil
+   end
+   return fibers[co]
+end
+
+-- wait:
+wait = function(funcs,args,cb)
+   -- current fiber:
+   local f = context(f)
+
+   -- onle one func?
+   if type(funcs) == 'function' then
+      funcs = {funcs}
+      args = {args}
+   end
+
+   -- run all functions:
+   local results = {}
+   for i,func in ipairs(funcs) do
+      func(unpack(args[i]),function(...)
+         results[i] = cb(...)
+         f.resume()
+      end)
+   end
+
+   -- wait on all functions to complete
+   for i = 1,#funcs do
+      f.yield()
+   end
+
+   -- return results
+   if #results == 1 then
+      return unpack(results[1])
+   else
+      return results
+   end
+end
+
 -- pkg
 local pkg = {
    new = fiber,
    fibers = fibers,
-   context = function()
-      local co = coroutine.running()
-      if not co or not fibers[co] then
-         print('async.fiber.current() : not currently in a managed fiber')
-         return nil
-      end
-      return fibers[co]
-   end
+   context = context,
+   wait = wait,
 }
 
 -- metatable
