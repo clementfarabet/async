@@ -4,6 +4,9 @@ local uv = require 'luv'
 -- we need penlight for a few convenience functions
 require 'pl'
 
+-- use fibers for sync reads
+local fiber = require 'async.fiber'
+
 -- make handle out of uv client
 local function handle(client)
    -- handle wraper:
@@ -56,35 +59,35 @@ local function handle(client)
    -- activate sync read (must be used within fiber)
    h.sync = function()
       -- local buffers:
-      local cos = {}
+      local fibers = {}
       local data = {}
 
       -- capture all data:
       h.ondata(function(d)
-         local ccos = cos
-         cos = {}
-         for co in pairs(ccos) do
-            data[co] = d
-            coroutine.resume(co)
+         local cfibers = fibers
+         fibers = {}
+         for f in pairs(cfibers) do
+            data[f] = d
+            f.resume()
          end
       end)
 
       -- synchronous read:
       h.read = function()
          -- get coroutine:
-         local co = coroutine.running()
-         if not co then
+         local f = fiber.context()
+         if not f then
             print('read() can only be used within a fiber(function() client.read() end) context')
             return nil
          end
-         cos[co] = true
+         fibers[f] = true
 
-         -- yield...
-         coroutine.yield()
+         -- yield
+         f.yield()
 
          -- coroutine has been resumed, data is available
-         local d = data[co]
-         data[co] = nil
+         local d = data[f]
+         data[f] = nil
          return d
       end
 
