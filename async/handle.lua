@@ -138,7 +138,6 @@ local function handle(client)
          -- GC:
          for f in pairs(lines) do
             if not fiber.fibers[f.co] then
-               print('clearing buffers for fiber: ', f)
                lines[f] = nil
                buffer[f] = nil
             end
