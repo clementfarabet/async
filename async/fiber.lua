@@ -26,7 +26,7 @@ local fiber = function(func)
    -- start:
    f.resume()
    -- run GC:
-   for co in pairs(fibers) do
+   for co,f in pairs(fibers) do
       if coroutine.status(co) == 'dead' then
          fibers[co] = nil
       end

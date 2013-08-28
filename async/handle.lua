@@ -101,18 +101,18 @@ local function handle(client)
       local buffer = {}
       h.readsplit = function(split)
          -- get coroutine:
-         local co = coroutine.running()
-         if not co then
+         local f = fiber.context()
+         if not f then
             print('read() can only be used within a fiber(function() client.read() end) context')
             return nil
          end
-         lines[co] = lines[co] or {}
-         buffer[co] = buffer[co] or {}
+         lines[f] = lines[f] or {}
+         buffer[f] = buffer[f] or {}
 
          -- lines cached?
-         if #lines[co] > 0 then
-            local line = lines[co][1]
-            lines[co] = tablex.sub(lines[co],2,#lines[co])
+         if #lines[f] > 0 then
+            local line = lines[f][1]
+            lines[f] = tablex.sub(lines[f],2,#lines[f])
             return line
          end
 
@@ -122,24 +122,25 @@ local function handle(client)
             local chunks = stringx.split(res,split)
             for i,chunk in ipairs(chunks) do
                if i == #chunks then
-                  table.insert(buffer[co],chunk)
+                  table.insert(buffer[f],chunk)
                elseif i == 1 then
-                  table.insert(buffer[co],chunk)
-                  local line = table.concat(buffer[co])
-                  table.insert(lines[co],line)
-                  buffer[co] = {}
+                  table.insert(buffer[f],chunk)
+                  local line = table.concat(buffer[f])
+                  table.insert(lines[f],line)
+                  buffer[f] = {}
                else
-                  table.insert(lines[co],chunk)
+                  table.insert(lines[f],chunk)
                end
             end
             break
          end
 
          -- GC:
-         for co in pairs(lines) do
-            if coroutine.status(co) == 'dead' then
-               lines[co] = nil
-               buffer[co] = nil
+         for f in pairs(lines) do
+            if not fiber.fibers[f.co] then
+               print('clearing buffers for fiber: ', f)
+               lines[f] = nil
+               buffer[f] = nil
             end
          end
 
