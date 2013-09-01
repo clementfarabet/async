@@ -5,9 +5,6 @@ return {
    setInterval = require('async.time').setInterval,
    setTimeout = require('async.time').setTimeout,
    uv = require('luv'),
-   go = function()
-      require('luv').run('default')
-   end,
    cpuInfo = require('luv').cpuInfo,
    hrtime = require('luv').hrtime,
    getTotalMemory = require('luv').get_total_memory,
@@ -16,5 +13,16 @@ return {
    fs = require('async.fs'),
    json = require('async.json'),
    http = require('async.http'),
-   process = require('async.process')
+   process = require('async.process'),
+   go = function(fn)
+      if fn then
+         local to = require('async.time').setTimeout
+         local function cycle()
+            fn()
+            to(1,cycle)
+         end
+         cycle()
+      end
+      require('luv').run('default')
+   end,
 }
