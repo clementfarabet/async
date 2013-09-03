@@ -30,6 +30,12 @@ local function bindio()
       stdout = handle(io.stdout)
       stderr = handle(io.stderr)
 
+      -- flush
+      local ioflush = io.flush
+      io.flush = function()
+         while not ioflush() do end
+      end
+
       -- done
       bindok = true
 
