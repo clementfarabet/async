@@ -5,10 +5,10 @@ local wait = require 'async.fiber'.wait
 
 fiber(function()
    -- wait on one function:
-   local result = wait(setTimeout, {1000}, function(timer)
-      return 'something produced asynchronously'
+   local result,aux = wait(setTimeout, {1000}, function(timer)
+      return 'something produced asynchronously', 'test'
    end)
-   print(result)
+   print(result,aux)
 
    -- wait on multiple functions:
    local results = wait({setTimeout, setTimeout}, {{500},{3000}}, function(timer)

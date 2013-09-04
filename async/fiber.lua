@@ -12,7 +12,7 @@ local fiber = function(func)
    local f = {
       co = co,
       resume = function()
-         coroutine.resume(co)
+         assert(coroutine.resume(co))
       end,
       yield = function()
          if co == coroutine.running() then
@@ -60,16 +60,18 @@ wait = function(funcs,args,cb)
    local results = {}
    for i,func in ipairs(funcs) do
       func(unpack(args[i]),function(...)
-         results[i] = cb(...)
-         f.resume()
+         results[i] = {cb(...)}
+         -- f.resume()
+         assert(coroutine.resume(f.co))
       end)
    end
 
    -- wait on all functions to complete
    for i = 1,#funcs do
-      f.yield()
+      -- f.yield()
+      coroutine.yield()
    end
-
+   
    -- return results
    if #results == 1 then
       return unpack(results[1])
