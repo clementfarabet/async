@@ -61,8 +61,7 @@ wait = function(funcs,args,cb)
    for i,func in ipairs(funcs) do
       func(unpack(args[i]),function(...)
          results[i] = {cb(...)}
-         -- f.resume()
-         assert(coroutine.resume(f.co))
+         f.resume()
       end)
    end
 
