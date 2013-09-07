@@ -13,3 +13,7 @@ luv/Makefile:
 
 luv/luv.so: luv/Makefile
 	$(MAKE) -C luv
+
+clean:
+	$(MAKE) -C lhttp_parser clean
+	$(MAKE) -C luv clean
