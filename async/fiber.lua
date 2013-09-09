@@ -50,6 +50,9 @@ wait = function(funcs,args,cb)
    -- current fiber:
    local f = context(f)
 
+   -- default cb
+   cb = cb or function(...) return ... end
+
    -- onle one func?
    if type(funcs) == 'function' then
       funcs = {funcs}
@@ -59,16 +62,18 @@ wait = function(funcs,args,cb)
    -- run all functions:
    local results = {}
    for i,func in ipairs(funcs) do
-      func(unpack(args[i]),function(...)
+      local arg = args[i]
+      table.insert(arg, function(...)
          results[i] = {cb(...)}
          f.resume()
       end)
+      func(unpack(arg))
    end
 
    -- wait on all functions to complete
    for i = 1,#funcs do
-      -- f.yield()
-      coroutine.yield()
+      f.yield()
+      -- coroutine.yield()
    end
    
    -- return results
