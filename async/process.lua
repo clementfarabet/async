@@ -35,7 +35,7 @@ function process.spawn(path, args, handler)
    }
 
    -- Handler
-   handler(client)
+   if handler then handler(client) end
 
    -- return client
    return client

@@ -1507,7 +1507,8 @@ static int luv_fs_write(lua_State* L) {
   size_t length;
   const char* string = luaL_checklstring(L, 2, &length);
   char* buffer = malloc(length + 1);
-  uv_strlcpy(buffer, string, length + 1);
+  /* uv_strlcpy(buffer, string, length + 1); */
+  memcpy(buffer, string, length + 1);
   off_t offset = -1;
   if (!lua_isnil(L, 3)) {
     offset = luaL_checkint(L, 3);
