@@ -2,6 +2,7 @@ local async = require 'async'
 local setTimeout = require 'async'.setTimeout
 local fiber = require 'async.fiber'
 local wait = require 'async.fiber'.wait
+local sync = require 'async.fiber'.sync
 local exec = require 'async.process'.exec
 
 fiber(function()
@@ -19,6 +20,10 @@ fiber(function()
    
    -- spawn job, default callback
    local res = wait(exec, {'ls', {'-l'}})
+   print(res)
+
+   -- we also provide a nicer syntax, that autowraps the most common calls (sync,exec,...):
+   local res = sync.exec('ls', {'-al'})
    print(res)
 end)
 

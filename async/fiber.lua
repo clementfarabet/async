@@ -84,13 +84,26 @@ wait = function(funcs,args,cb)
    end
 end
 
+-- sync: magic wrapper that transforms any function into a syncable one
+local function sincify(self,key)
+   local async = require 'async'
+   local afunc = async[key] or async.process[key] or async.fs[key] or async.time[key]
+   return function(...)
+      return wait(afunc, {...})
+   end
+end
+local sync = {}
+setmetatable(sync, {
+   __index = sincify
+})
+
 -- pkg
 local pkg = {
    new = fiber,
    fibers = fibers,
    context = context,
    wait = wait,
-   sync = wait,
+   sync = sync,
 }
 
 -- metatable
