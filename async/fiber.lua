@@ -90,6 +90,7 @@ local pkg = {
    fibers = fibers,
    context = context,
    wait = wait,
+   sync = wait,
 }
 
 -- metatable
