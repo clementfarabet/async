@@ -36,6 +36,11 @@ local function bindio()
          while not ioflush() do end
       end
 
+      -- io.write
+      io.write = function(...)
+         io.stdout:write(...)
+      end
+
       -- done
       bindok = true
 
