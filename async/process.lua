@@ -46,12 +46,22 @@ function process.exec(path, args, callback)
    -- Spawn:
    process.spawn(path, args, function(process)
       local result = {}
+      local term = false
       process.stdout.ondata(function(chunk)
          table.insert(result,chunk)
       end)
-      process.stdout.onend(function(code,signal)
-         local result = table.concat(result)
-         callback(result,code,signal)
+      process.stdout.onend(function()
+         result = table.concat(result)
+         if term then
+            callback(result,unpack(term))
+         end
+      end)
+      process.onexit(function(code,signal)
+         if type(result) == 'string' then
+            callback(result,code,signal)
+         else
+            term = {code,signal}
+         end
       end)
    end)
 end
