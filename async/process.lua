@@ -13,9 +13,9 @@ function process.spawn(path, args, handler)
    local h, stdin, stdout, stderr, pid = uv.spawn(path, args)
 
    -- handlify pipes:
-   stdin = handle(stdin)
-   stdout = handle(stdout)
-   stderr = handle(stderr)
+   _stdin = handle(stdin)
+   _stdout = handle(stdout)
+   _stderr = handle(stderr)
 
    -- package client:
    local client = {
@@ -26,12 +26,22 @@ function process.spawn(path, args, handler)
       onexit = function(cb)
          h.onexit = function(self,status,signal)
             if cb then cb(status,signal) end
+            uv.close(h)
+            uv.close(stdin)
+            if not _stdout.reading then
+               uv.close(stdout)
+               print('closing unread stdout')
+            end
+            if not _stderr.reading then
+               uv.close(stderr)
+               print('closing unread stderr')
+            end
          end
       end,
       pid = pid,
-      stdin = stdin,
-      stdout = stdout,
-      stderr = stderr,
+      stdin = _stdin,
+      stdout = _stdout,
+      stderr = _stderr,
    }
 
    -- Handler

@@ -13,15 +13,21 @@ local function handle(client)
    local h = {}
 
    -- common read/write abstractions:
+   h.reading = false
    h.ondata = function(cb)
       client.ondata = function(self,data)
          if cb then cb(data) end
       end
       uv.read_start(client)
+      h.reading = true
    end
    h.onend = function(cb)
       client.onend = function(self)
          if cb then cb() end
+         if h.reading then
+            uv.close(client)
+            print('closing reading std')
+         end
       end
    end
    h.onclose = function(cb)
