@@ -26,7 +26,6 @@ local function handle(client)
          if cb then cb() end
          if h.reading then
             uv.close(client)
-            print('closing reading std')
          end
       end
    end
