@@ -9,6 +9,7 @@ return {
    hrtime = require('luv').hrtime,
    getTotalMemory = require('luv').get_total_memory,
    getFreeMemory = require('luv').get_free_memory,
+   getAddrInfo = require('luv').getaddrinfo,
    repl = require('async.repl'),
    fs = require('async.fs'),
    json = require('async.json'),
