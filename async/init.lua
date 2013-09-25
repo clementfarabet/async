@@ -9,7 +9,9 @@ return {
    hrtime = require('luv').hrtime,
    getTotalMemory = require('luv').get_total_memory,
    getFreeMemory = require('luv').get_free_memory,
-   getAddrInfo = require('luv').getaddrinfo,
+   getAddrInfo = function(opts,cb)
+      require('luv').getaddrinfo(opts.path, opts.port, opts[1], cb)
+   end,
    repl = require('async.repl'),
    fs = require('async.fs'),
    json = require('async.json'),
