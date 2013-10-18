@@ -8,7 +8,7 @@ local exec = require 'async.process'.exec
 fiber(function()
    -- functions to run in //
    local funcs,args = {},{}
-   for i = 1,200 do
+   for i = 1,2000 do
       funcs[i] = function(cb) 
          async.process.exec('ls', {}, cb) 
       end

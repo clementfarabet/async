@@ -46,9 +46,16 @@ local context = function()
 end
 
 -- wait:
-wait = function(funcs,args,cb)
+wait = function(funcs,args,limit,cb)
    -- current fiber:
    local f = context(f)
+
+   if type(limit) == 'function' then
+      cb = limit
+      limit = 64
+   elseif limit == nil then
+      limit = 64
+   end
 
    -- default cb
    cb = cb or function(...) return ... end
@@ -61,18 +68,35 @@ wait = function(funcs,args,cb)
 
    -- run all functions:
    local results = {}
-   for i,func in ipairs(funcs) do
-      local arg = args[i]
+   local index = 1
+
+   while true do
+--   for i,func in ipairs(funcs) do
+      local arg = args[index]
+      local index2 = index
       table.insert(arg, function(...)
-         results[i] = {cb(...)}
+         results[index2] = {cb(...)}
          f.resume()
       end)
-      func(unpack(arg))
+      funcs[index](unpack(arg))
+      index = index + 1
+      if index > limit or not funcs[index] then break end
    end
 
    -- wait on all functions to complete
    for i = 1,#funcs do
       f.yield()
+      if funcs[index] then
+         local index2 = index
+         local arg = args[index]
+         table.insert(arg, function(...)
+            results[index2] = {cb(...)}
+            f.resume()
+         end)
+         funcs[index](unpack(arg))
+
+         index = index + 1
+      end
       -- coroutine.yield()
    end
    
