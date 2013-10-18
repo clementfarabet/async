@@ -66,13 +66,15 @@ wait = function(funcs,args,limit,cb)
       args = {args}
    end
 
+   -- no args?
+   args = args or {}
+
    -- run all functions:
    local results = {}
    local index = 1
 
    while true do
---   for i,func in ipairs(funcs) do
-      local arg = args[index]
+      local arg = args[index] or {}
       local index2 = index
       table.insert(arg, function(...)
          results[index2] = {cb(...)}
@@ -88,7 +90,7 @@ wait = function(funcs,args,limit,cb)
       f.yield()
       if funcs[index] then
          local index2 = index
-         local arg = args[index]
+         local arg = args[index] or {}
          table.insert(arg, function(...)
             results[index2] = {cb(...)}
             f.resume()
@@ -97,7 +99,6 @@ wait = function(funcs,args,limit,cb)
 
          index = index + 1
       end
-      -- coroutine.yield()
    end
    
    -- return results
