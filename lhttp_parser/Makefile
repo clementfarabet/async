@@ -1,7 +1,7 @@
 uname_S=$(shell uname -s)
 ifeq (Darwin, $(uname_S))
   CFLAGS=-Ihttp-parser -I/usr/local/include/luajit-2.0 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Wall -Werror -fPIC
-  LIBS=-lm -lpthread -lluajit-5.1 -L/usr/local/lib/
+  LIBS=-lm -lpthread -lluajit -L/usr/local/lib/
   SHARED_LIB_FLAGS=-bundle -o lhttp_parser.so lhttp_parser.o http-parser/http_parser.o
 else
   CFLAGS=-Ihttp-parser -I/usr/local/include/luajit-2.0 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Wall -Werror -fPIC
