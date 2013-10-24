@@ -47,10 +47,19 @@ local function handle(client)
    -- convenience function to split a stream,
    -- and call a callback each time a full split is found
    h.onsplitdata = function(limit,cb)
+      local splitter
+      if type(limit) == 'function' then
+         splitter = function(chunk)
+            return limit(chunk)
+         end
+      else
+         splitter = function(chunk)
+            return ipairs(stringx.split(chunk,limit))
+         end
+      end
       local fullpacket = {}
       h.ondata(function(chunk)
-         local chunks = stringx.split(chunk,limit)
-         for i,chunk in ipairs(chunks) do
+         for i,chunk in splitter(chunk) do
             table.insert(fullpacket,chunk)
             if i < #chunks then
                local req = table.concat(fullpacket)
