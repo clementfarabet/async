@@ -50,16 +50,22 @@ local function handle(client)
       local splitter
       if type(limit) == 'function' then
          splitter = function(chunk)
-            return limit(chunk)
+            local chunks,leftover = limit(chunk)
+            if leftover then
+               table.insert(chunks,leftover)
+            end
+            return chunks
          end
       else
          splitter = function(chunk)
-            return ipairs(stringx.split(chunk,limit))
+            local chunks = stringx.split(chunk,limit)
+            return chunks
          end
       end
       local fullpacket = {}
       h.ondata(function(chunk)
-         for i,chunk in splitter(chunk) do
+         local chunks = splitter(chunk)
+         for i,chunk in ipairs(chunks) do
             table.insert(fullpacket,chunk)
             if i < #chunks then
                local req = table.concat(fullpacket)
@@ -113,7 +119,7 @@ local function handle(client)
       -- be unpredictable, because of the buffering.
       local lines = {}
       local buffer = {}
-      h.readsplit = function(split)
+      h.readsplit = function(limit)
          -- get coroutine:
          local f = fiber.context()
          if not f then
@@ -129,11 +135,28 @@ local function handle(client)
             lines[f] = tablex.sub(lines[f],2,#lines[f])
             return line
          end
+     
+         -- splitter function:
+         local splitter
+         if type(limit) == 'function' then
+            splitter = function(chunk)
+               local chunks,leftover = limit(chunk)
+               if leftover then
+                  table.insert(chunks,leftover)
+               end
+               return chunks
+            end
+         else
+            splitter = function(chunk)
+               local chunks = stringx.split(chunk,limit)
+               return chunks
+            end
+         end
 
          -- grab next lines:
          while true do
             local res = h.read()
-            local chunks = stringx.split(res,split)
+            local chunks = splitter(res)
             for i,chunk in ipairs(chunks) do
                if i == #chunks then
                   table.insert(buffer[f],chunk)
