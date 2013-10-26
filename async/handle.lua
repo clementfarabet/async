@@ -46,11 +46,11 @@ local function handle(client)
 
    -- convenience function to split a stream,
    -- and call a callback each time a full split is found
-   h.onsplitdata = function(limit,cb)
+   h.onsplitdata = function(split,cb)
       local splitter
-      if type(limit) == 'function' then
+      if type(split) == 'function' then
          splitter = function(chunk)
-            local chunks,leftover = limit(chunk)
+            local chunks,leftover = split(chunk)
             if leftover then
                table.insert(chunks,leftover)
             end
@@ -58,7 +58,7 @@ local function handle(client)
          end
       else
          splitter = function(chunk)
-            local chunks = stringx.split(chunk,limit)
+            local chunks = stringx.split(chunk,split)
             return chunks
          end
       end
@@ -119,7 +119,7 @@ local function handle(client)
       -- be unpredictable, because of the buffering.
       local lines = {}
       local buffer = {}
-      h.readsplit = function(limit)
+      h.readsplit = function(split)
          -- get coroutine:
          local f = fiber.context()
          if not f then
@@ -138,9 +138,9 @@ local function handle(client)
      
          -- splitter function:
          local splitter
-         if type(limit) == 'function' then
+         if type(split) == 'function' then
             splitter = function(chunk)
-               local chunks,leftover = limit(chunk)
+               local chunks,leftover = split(chunk)
                if leftover then
                   table.insert(chunks,leftover)
                end
@@ -148,7 +148,7 @@ local function handle(client)
             end
          else
             splitter = function(chunk)
-               local chunks = stringx.split(chunk,limit)
+               local chunks = stringx.split(chunk,split)
                return chunks
             end
          end
