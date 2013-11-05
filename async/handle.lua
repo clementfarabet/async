@@ -64,6 +64,10 @@ local function handle(client)
       end
       local fullpacket = {}
       h.ondata(function(chunk)
+         table.insert(fullpacket, chunk)
+         chunk = table.concat(fullpacket)
+         fullpacket = {}
+
          local chunks = splitter(chunk)
          for i,chunk in ipairs(chunks) do
             table.insert(fullpacket,chunk)
