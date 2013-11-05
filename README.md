@@ -9,15 +9,6 @@ should be extremely efficient (a lot of testing is required).
 
 The examples in `tests/` should provide enough documentation on the API.
 
-TODO
-----
-
-Features:
-* async.spawn() : spawn a child process, with control over stdin,out,err
-* async.exec() : spawn a child process, just read out stdout in one block, when complete
-* async.getAddrInfo() : get addr info (DNS) - requires wrapping `uv_getaddrinfo`
-* async.http.listen/connect : http server and client (simple using `http_parser`)
-
 License
 -------
 
