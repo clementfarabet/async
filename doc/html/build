@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+jekyll serve --destination ../html --watch

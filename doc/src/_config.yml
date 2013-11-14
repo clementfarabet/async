@@ -1,0 +1,7 @@
+markdown: redcarpet
+safe: false
+lsi: false
+pygments: true
+exclude: [Gemfile, Gemfile.lock, README.DOC.markdown]
+redcarpet:
+  extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "strikethrough", "superscript", "with_toc_data"]
