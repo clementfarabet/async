@@ -17,6 +17,7 @@ return {
    json = require('async.json'),
    http = require('async.http'),
    process = require('async.process'),
+   pcall = require('async.pcall'),
    go = function(fn)
       if fn then
          local to = require('async.time').setTimeout
