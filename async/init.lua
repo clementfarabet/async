@@ -5,7 +5,7 @@ return {
    setInterval = require('async.time').setInterval,
    setTimeout = require('async.time').setTimeout,
    uv = require('luv'),
-   cpuInfo = require('luv').cpuInfo,
+   cpuInfo = require('luv').cpu_info,
    hrtime = require('luv').hrtime,
    getTotalMemory = require('luv').get_total_memory,
    getFreeMemory = require('luv').get_free_memory,
