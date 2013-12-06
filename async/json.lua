@@ -15,7 +15,8 @@ function json.listen(domain, cb)
    tcp.listen(domain, function(client)
       client.onsplitdata('\n', function(req)
          -- decode json:
-         req = json.decode(req)
+	local ok, req = pcall(json.decode, req)
+	if not ok then print('bad json request'); client.close(); return; end
 
          -- call user handle:
          cb(req, function(res)
@@ -38,7 +39,8 @@ function json.connect(domain, cb)
       end
       client.onsplitdata('\n', function(req)
          -- decode json:
-         req = json.decode(req)
+	 local ok, req = pcall(json.decode, req)
+         if not ok then print('bad json request'); client.close(); return; end
 
          -- call user receive function:
          if receive then
