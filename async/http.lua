@@ -3,6 +3,7 @@ local uv = require 'luv'
 
 -- tcp
 local tcp = require 'async.tcp'
+local json = require 'cjson'
 
 -- bindings for lhttp_parser
 local newHttpParser = require 'lhttp_parser'.new
@@ -97,6 +98,11 @@ function http.listen(domain, handler)
             request.parser = parser
             request.socket = request.socket
             keepAlive = request.should_keep_alive
+	    
+	    if request.method == 'POST' and request.headers['content-type'] == "application/json" then
+	       local ok, j = pcall(json.decode, request.body)
+	       if ok then request.body = j end
+	    end
 
             -- headers ready? -> call user handler
             handler(request, function(body,headers,statusCode)
