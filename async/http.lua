@@ -72,6 +72,7 @@ function http.listen(domain, handler)
    tcp.listen(domain, function(client)
       -- Http Request Parser:
       local currentField, headers, lurl, request, parser, keepAlive, body
+      body = {}
       parser = newHttpParser("request", {
          onMessageBegin = function ()
             headers = {}
@@ -89,10 +90,10 @@ function http.listen(domain, handler)
             request = info
          end,
          onBody = function (chunk)
-            body = chunk
+            table.insert(body, chunk)
          end,
          onMessageComplete = function ()
-	    request.body = body
+	    request.body = table.concat(body)
             request.url = lurl
             request.headers = headers
             request.parser = parser
