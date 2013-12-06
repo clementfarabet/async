@@ -70,7 +70,7 @@ http.codes = {
 function http.listen(domain, handler)
    tcp.listen(domain, function(client)
       -- Http Request Parser:
-      local currentField, headers, lurl, request, parser, keepAlive
+      local currentField, headers, lurl, request, parser, keepAlive, body
       parser = newHttpParser("request", {
          onMessageBegin = function ()
             headers = {}
@@ -85,9 +85,13 @@ function http.listen(domain, handler)
             headers[currentField:lower()] = value
          end,
          onHeadersComplete = function (info)
-            -- headers:
             request = info
-            request.body = {}
+         end,
+         onBody = function (chunk)
+            body = chunk
+         end,
+         onMessageComplete = function ()
+	    request.body = body
             request.url = lurl
             request.headers = headers
             request.parser = parser
@@ -137,12 +141,6 @@ function http.listen(domain, handler)
                   client.close()
                end
             end)
-         end,
-         onBody = function (chunk)
-            table.insert(request.body, chunk)
-         end,
-         onMessageComplete = function ()
-            request.body = table.concat(request.body)
          end
       })
 
