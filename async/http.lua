@@ -3,6 +3,7 @@ local uv = require 'luv'
 
 -- tcp
 local tcp = require 'async.tcp'
+local json = require 'cjson'
 
 -- bindings for lhttp_parser
 local newHttpParser = require 'lhttp_parser'.new
@@ -70,7 +71,8 @@ http.codes = {
 function http.listen(domain, handler)
    tcp.listen(domain, function(client)
       -- Http Request Parser:
-      local currentField, headers, lurl, request, parser, keepAlive
+      local currentField, headers, lurl, request, parser, keepAlive, body
+      body = {}
       parser = newHttpParser("request", {
          onMessageBegin = function ()
             headers = {}
@@ -85,14 +87,23 @@ function http.listen(domain, handler)
             headers[currentField:lower()] = value
          end,
          onHeadersComplete = function (info)
-            -- headers:
             request = info
-            request.body = {}
+         end,
+         onBody = function (chunk)
+            table.insert(body, chunk)
+         end,
+         onMessageComplete = function ()
+	    request.body = table.concat(body)
             request.url = lurl
             request.headers = headers
             request.parser = parser
             request.socket = request.socket
             keepAlive = request.should_keep_alive
+	    
+	    if request.method == 'POST' and request.headers['content-type'] == "application/json" then
+	       local ok, j = pcall(json.decode, request.body)
+	       if ok then request.body = j end
+	    end
 
             -- headers ready? -> call user handler
             handler(request, function(body,headers,statusCode)
@@ -137,12 +148,6 @@ function http.listen(domain, handler)
                   client.close()
                end
             end)
-         end,
-         onBody = function (chunk)
-            table.insert(request.body, chunk)
-         end,
-         onMessageComplete = function ()
-            request.body = table.concat(request.body)
          end
       })
 

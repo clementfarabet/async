@@ -17,6 +17,7 @@ Async framework for Torch, based on LibUV.
 
 dependencies = {
    "torch >= 7.1.alpha",
+   "lua-cjson >= 0.1"
 }
 
 build = {
