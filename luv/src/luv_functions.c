@@ -719,6 +719,16 @@ static void luv_on_read(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
 
   free(buf.base);
 #ifdef LUV_STACK_CHECK
+  
+  if(lua_gettopn != top){
+    lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+    lua_getfield(L, -1, "traceback");
+    lua_pushvalue(L, 1);
+    lua_pushinteger(L, 2);
+    lua_call(L, 2, 1);
+    fprintf(stderr, "%s\n", lua_tostring(L, -1));
+  }
+
   assert(lua_gettop(L) == top);
 #endif
 }
