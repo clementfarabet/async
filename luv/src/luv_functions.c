@@ -268,10 +268,8 @@ static void on_addrinfo(uv_getaddrinfo_t* req, int status, struct addrinfo* res)
       uv_inet_ntop(curr->ai_family, addr, ip, INET6_ADDRSTRLEN);
       lua_pushstring(L, ip);
       lua_setfield(L, -2, "addr");
-      if (ntohs(port)) {
-        lua_pushinteger(L, ntohs(port));
-        lua_setfield(L, -2, "port");
-      }
+      lua_pushinteger(L, ntohs(port));
+      lua_setfield(L, -2, "port");
       if (curr->ai_socktype == SOCK_STREAM) {
         lua_pushstring(L, "STREAM");
         lua_setfield(L, -2, "socktype");
@@ -293,24 +291,36 @@ static void on_addrinfo(uv_getaddrinfo_t* req, int status, struct addrinfo* res)
         case AF_IPX:
           lua_pushstring(L, "IPX");
           break;
+#ifdef AF_NETLINK
         case AF_NETLINK:
           lua_pushstring(L, "NETLINK");
           break;
+#endif
+#ifdef AF_X25
         case AF_X25:
           lua_pushstring(L, "X25");
           break;
+#endif
+#ifdef AF_AX25
         case AF_AX25:
           lua_pushstring(L, "AX25");
           break;
+#endif
+#ifdef AF_ATMPVC
         case AF_ATMPVC:
           lua_pushstring(L, "ATMPVC");
           break;
+#endif
+#ifdef AF_APPLETALK
         case AF_APPLETALK:
           lua_pushstring(L, "APPLETALK");
           break;
+#endif
+#ifdef AF_PACKET
         case AF_PACKET:
           lua_pushstring(L, "PACKET");
           break;
+#endif
         default:
           lua_pushstring(L, NULL);
       }
@@ -395,24 +405,36 @@ static int luv_getaddrinfo(lua_State* L) {
       else if (strcmp(protocol, "IPX") == 0) {
         hints->ai_protocol = AF_IPX;
       }
+#ifdef AF_NETLINK
       else if (strcmp(protocol, "NETLINK") == 0) {
         hints->ai_protocol = AF_NETLINK;
       }
+#endif
+#ifdef AF_X25
       else if (strcmp(protocol, "X25") == 0) {
         hints->ai_protocol = AF_X25;
       }
+#endif
+#ifdef AF_AX25
       else if (strcmp(protocol, "AX25") == 0) {
         hints->ai_protocol = AF_AX25;
       }
+#endif
+#ifdef AF_ATMPVC
       else if (strcmp(protocol, "ATMPVC") == 0) {
         hints->ai_protocol = AF_ATMPVC;
       }
+#endif
+#ifdef AF_APPLETALK
       else if (strcmp(protocol, "APPLETALK") == 0) {
         hints->ai_protocol = AF_APPLETALK;
       }
+#endif
+#ifdef AF_PACKET
       else if (strcmp(protocol, "PACKET") == 0) {
         hints->ai_protocol = AF_PACKET;
       }
+#endif
       else {
         return luaL_error(L, "Unknown protocol");
       }
