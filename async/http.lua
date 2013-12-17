@@ -143,6 +143,10 @@ function http.listen(domain, handler)
                -- Keep alive?
                if keepAlive then
                   parser:reinitialize('request')
+
+                  -- TODO: not sure how to handle keep alive sessions, closing for now
+                  parser:finish()
+                  client.close()
                else
                   parser:finish()
                   client.close()
