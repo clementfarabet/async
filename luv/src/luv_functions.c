@@ -725,10 +725,7 @@ static void luv_on_read(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
 
   free(buf.base);
 #ifdef LUV_STACK_CHECK
-
-  if (nread >= 0) {
-      assert(lua_gettop(L) == top);
-  }
+  assert(lua_gettop(L) == top);
 #endif
 }
 
