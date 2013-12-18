@@ -11,9 +11,9 @@ local setpcall = function(cb, handler)
    return function(...)
       local args = {...}
 
-      xpcall(function() cb(unpack(args)) end, function()
+      xpcall(function() cb(unpack(args)) end, function(err)
 
-         local currenttraceback = debug.traceback()
+         local currenttraceback = debug.traceback(err)
          if handler then
             handler(currenttraceback, framelocation, debuginfo)
          else
