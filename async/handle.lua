@@ -21,6 +21,12 @@ local function handle(client)
       uv.read_start(client)
       h.reading = true
    end
+   h.onerr = function(cb)
+      client.onerr = function(self,code)
+         if cb then cb(code) end
+         uv.close(client)
+      end
+   end
    h.onend = function(cb)
       client.onend = function(self)
          if cb then cb() end
@@ -42,6 +48,12 @@ local function handle(client)
          uv.close(client)
          if cb then cb() end
       end)
+   end
+
+   -- default error handler
+   client.onerr = function(self, code)
+      print('error on client - code: ' .. code)
+      uv.close(client)
    end
 
    -- convenience function to split a stream,

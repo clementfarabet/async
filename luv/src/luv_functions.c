@@ -714,6 +714,12 @@ static void luv_on_read(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
       /* TODO: route reset events somewhere so the user knows about them */
       fprintf(stderr, "TODO: Implement async error handling\n");
       assert(0);
+    } else {
+      // Handling errors
+      if (luv_get_callback(L, "onerr")) {
+        lua_pushnumber(L, err.code);
+        luv_call(L, 2, 0);
+      }
     }
   }
 
