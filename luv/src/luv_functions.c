@@ -500,7 +500,17 @@ static void on_close(uv_handle_t* handle) {
   if (luv_get_callback(L, "onclose")) {
     luv_call(L, 1, 0);
   }
-  luv_handle_unref(L, handle->data);
+  luv_handle_t* lhandle = handle->data;
+  luv_handle_unref(L, lhandle);
+   
+  if (lhandle->ref != LUA_NOREF) {
+    assert(lhandle->refCount);
+/*    fprintf(stderr, "WARNING: closed %s with %d extra refs lhandle=%p handle=%p\n", lhandle->type, lhandle->refCount, handle->data, handle);*/
+    lhandle->refCount = 1;
+    luv_handle_unref(L, handle->data);
+  }
+
+  assert(lhandle->ref == LUA_NOREF);
 #ifdef LUV_STACK_CHECK
   assert(lua_gettop(L) == top);
 #endif
