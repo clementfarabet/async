@@ -4,13 +4,13 @@ async.json.connect({host='localhost', port=8483}, function(client)
    client.receive(function(res)
       print('response:',res)
    end)
-   local int = async.setInterval(500,function()
+   local int = async.setInterval(200,function()
       client.send({
-         msg = 'my question:',
+         msg = 'hey, how are you man?',
          attached = 'how are you?'
       })
    end)
-   async.setTimeout(2100, function()
+   async.setTimeout(1000, function()
       client.close()
       int.clear()
    end)

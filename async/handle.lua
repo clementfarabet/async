@@ -12,6 +12,18 @@ local function handle(client)
    -- handle wraper:
    local h = {}
 
+   -- default callbacks:
+   client.onend = function()
+      if h.reading then
+         uv.read_stop(client)
+         uv.close(client)
+      end
+   end
+   client.onerr = function()
+      if h.reading then uv.read_stop(client) end
+      uv.close(client)
+   end
+
    -- common read/write abstractions:
    h.reading = false
    h.ondata = function(cb)
@@ -24,7 +36,7 @@ local function handle(client)
    h.onerr = function(cb)
       client.onerr = function(self,code)
          if cb then cb(code) end
-	 if h.reading then uv.read_stop(client); end
+         if h.reading then uv.read_stop(client) end
          uv.close(client)
       end
    end
@@ -32,7 +44,7 @@ local function handle(client)
       client.onend = function(self)
          if cb then cb() end
          if h.reading then
-	    uv.read_stop(client)
+            uv.read_stop(client)
             uv.close(client)
          end
       end
@@ -47,7 +59,7 @@ local function handle(client)
    end
    h.close = function(cb)
       uv.shutdown(client, function()
-	 if h.reading then uv.read_stop(client); end
+         if h.reading then uv.read_stop(client); end
          uv.close(client)
          if cb then cb() end
       end)

@@ -11,6 +11,8 @@ local server = async.tcp.listen({host='localhost', port=8483}, function(client)
    end)
    client.onclose(function()
       print('closed.')
+      collectgarbage()
+      print(collectgarbage("count") * 1024)
    end)
 end)
 

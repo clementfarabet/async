@@ -8,7 +8,7 @@ local tcp = require 'async.tcp'
 -- This is a non-standard protocol, which is very handy
 -- to serialize data from one process to another. Each packet
 -- is a table, serialized as a JSON string. Each JSON string
--- is separated by a \0. See examples.
+-- is separated by a \n. See examples.
 local _,json = pcall(require,'cjson')
 
 function json.listen(domain, cb)

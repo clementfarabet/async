@@ -13,11 +13,11 @@ local client = async.tcp.connect('tcp://localhost:8483/', function(client)
    end)
    client.write('test')
 
-   local interval = async.setInterval(1000, function()
+   local interval = async.setInterval(200, function()
       client.write('test_ontimer')
    end)
 
-   async.setTimeout(5000, function()
+   async.setTimeout(1000, function()
       client.close()
       interval.clear()
    end)
