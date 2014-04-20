@@ -190,9 +190,17 @@ local function handle(client)
             local res = h.read()
             local chunks = splitter(res)
             for i,chunk in ipairs(chunks) do
-               if i == #chunks then
+					if chunk == "" then
+						-- stringx.split returns "" as placeholders for the splits
+						table.insert(buffer[f],chunk)
+                  local line = table.concat(buffer[f])
+                  table.insert(lines[f],line)
+                  buffer[f] = {}
+					elseif i == #chunks then
+						-- last chunk : assume split not reached afterwors
                   table.insert(buffer[f],chunk)
                elseif i == 1 then
+						-- first but not last chunk : split reached
                   table.insert(buffer[f],chunk)
                   local line = table.concat(buffer[f])
                   table.insert(lines[f],line)
