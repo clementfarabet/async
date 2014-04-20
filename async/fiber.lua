@@ -11,12 +11,12 @@ local fiber = function(func)
    -- store:
    local f = {
       co = co,
-      resume = function()
-         assert(coroutine.resume(co))
+      resume = function(...)
+         return assert(coroutine.resume(co, ...))
       end,
-      yield = function()
+      yield = function(...)
          if co == coroutine.running() then
-            coroutine.yield()
+            return coroutine.yield(...)
          else
             print('cannot pause a fiber if not in it!')
          end
@@ -24,7 +24,7 @@ local fiber = function(func)
    }
    fibers[co] = f
    -- start:
-   f.resume()
+   local reply = {f.resume()}
    -- run GC:
    for co,f in pairs(fibers) do
       if coroutine.status(co) == 'dead' then
@@ -32,7 +32,7 @@ local fiber = function(func)
       end
    end
    -- return:
-   return f
+   return f, unpack(reply)
 end
 
 -- return context:
