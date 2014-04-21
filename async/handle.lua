@@ -180,6 +180,8 @@ local function handle(client)
             end
          else
             splitter = function(chunk)
+               -- stringx.split returns "" as placeholders when it 
+               -- detects the split in either first or last position.
                local chunks = stringx.split(chunk,split)
                return chunks
             end
@@ -190,14 +192,16 @@ local function handle(client)
             local res = h.read()
             local chunks = splitter(res)
             for i,chunk in ipairs(chunks) do
-               if chunk == "" then
-                  -- stringx.split returns "" as placeholders for the splits
-                  table.insert(buffer[f],chunk)
+               if i == 1 and chunk == "" then
+                  -- first chunk identifies a detected split
                   local line = table.concat(buffer[f])
-                  table.insert(lines[f],line)
-                  buffer[f] = {}
+                  if #line > 0 then
+                     -- the buffer wasn't empty: write line
+                     table.insert(lines[f],line)
+                     buffer[f] = {}
+                  end
                elseif i == #chunks then
-                  -- last chunk : assume split not reached afterwors
+                  -- last chunk : assume split not reached
                   table.insert(buffer[f],chunk)
                elseif i == 1 then
                   -- first but not last chunk : split reached
