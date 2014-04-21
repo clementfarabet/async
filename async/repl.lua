@@ -205,6 +205,43 @@ function repl.connect(domain, callback)
    end)
 end
 
+-- parallel repl client:
+function repl.connectn(domains, callback)
+   -- bind io
+   bindio()
+
+   -- connect
+   local clients = {}
+   local N = #domains
+   local done = 0
+   for i = 1,N do
+      tcp.connect(domains[i], function(client)
+         -- store client:
+         clients[i] = client
+         done = done + 1
+
+         -- receive results from server
+         client.ondata(function(data)
+            stdout.write(data)
+         end)
+
+         -- user callback
+         if done == N and callback then
+            callback(client)
+         end
+      end)
+   end
+
+   -- capture stdin:
+   stdin.ondata(function(line)
+      for i = 1,N do
+         if clients[i] then
+            clients[i].write(' '..line)
+         end
+      end
+   end)
+end
+
 -- useful: colors
 repl.colors = {
    none = '\27[0m',
