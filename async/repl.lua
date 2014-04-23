@@ -222,7 +222,10 @@ function repl.connectn(domains, callback)
 
          -- receive results from server
          client.ondata(function(data)
-            stdout.write(data)
+            if data == '\n' then
+            else
+               stdout.write(data:gsub('\n$',''):gsub('^\n','')..'\n')
+            end
          end)
 
          -- user callback
