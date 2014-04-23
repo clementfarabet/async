@@ -206,9 +206,15 @@ function repl.connect(domain, callback)
 end
 
 -- parallel repl client:
-function repl.connectn(domains, callback)
+function repl.connectn(domains, opts, callback)
    -- bind io
    bindio()
+
+   -- opts?
+   opts = opts or {}
+   if opts and type(opts) == 'function' then
+      callback = opts
+   end
 
    -- connect
    local clients = {}
@@ -222,9 +228,13 @@ function repl.connectn(domains, callback)
 
          -- receive results from server
          client.ondata(function(data)
-            if data == '\n' then
-            else
-               stdout.write(data:gsub('\n$',''):gsub('^\n','')..'\n')
+            if not opts.mute then
+               -- TODO: cleanup these \n hacks. The current solution
+               -- is approximate (distorts the original stream), but
+               -- minimizes edge effects.
+               if data ~= '\n' then
+                  stdout.write(data:gsub('\n$',''):gsub('^\n','')..'\n')
+               end
             end
          end)
 
