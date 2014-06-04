@@ -88,6 +88,21 @@ function http.listen(domain, handler)
          end,
          onHeadersComplete = function (info)
             request = info
+	    
+	    if request.should_keep_alive then    
+	       -- For a persistent connection, all messages must have
+	       -- a self-defined length (not one defined by closure of
+	       -- the connection)
+	       headers['Content-Length']=#body -- TODO: luvit uses #chunk but not sure where chunk is defined
+	       
+	       if info.version_minor < 1 then -- HTTP/1.0: insert Connection: keep-alive
+	          headers['connection']='keep-alive'
+	       end
+	    else
+	       if info.version_minor >= 1 then -- HTTP/1.1+: insert Connection: close for last msg
+		  headers['connection']='close'
+	       end
+	    end
          end,
          onBody = function (chunk)
             table.insert(body, chunk)
@@ -99,7 +114,7 @@ function http.listen(domain, handler)
             request.parser = parser
             request.socket = request.socket
             keepAlive = request.should_keep_alive
-	    
+
 	    if request.method == 'POST' and request.headers['content-type'] == "application/json" then
 	       local ok, j = pcall(json.decode, request.body)
 	       if ok then request.body = j end
@@ -143,10 +158,13 @@ function http.listen(domain, handler)
                -- Keep alive?
                if keepAlive then
                   parser:reinitialize('request')
-
-                  -- TODO: not sure how to handle keep alive sessions, closing for now
+		  
+                  -- Rather than close a keep-alive connection, we leave the socket open
+		  -- to maintain the persistent connection. The client (browser) will time
+		  -- out after inactivity (http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
+		  -- To test that sockets are closed after the timeout, compare the output of this command:
+		  -- lsof -n | grep -i "luajit" | grep "http-alt" [optional: | grep -c "ESTABLISHED" for count]
                   parser:finish()
-                  client.close()
                else
                   parser:finish()
                   client.close()
