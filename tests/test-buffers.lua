@@ -2,13 +2,13 @@ local async = require 'async'
 local b = require 'buffer'
 
 local server = async.tcp.listen({host='localhost', port=8483}, function(client)
-   client.ondata(function(data)
+   client.ondata_raw(function(data)
       client.write(data)
    end)
 end)
 
 local client = async.tcp.connect('tcp://localhost:8483/', function(client)
-   client.ondata(function(data)
+   client.ondata_raw(function(data)
       print('received:',data)
    end)
 
