@@ -105,3 +105,38 @@ async.fs.readFile('LICENSE', function(content)
 end)
 ```
 
+A lower-level interface is also available, for C-level performance. The upside:
+no copy is done, the user callback gets the raw pointer to the network buffer (read)
+and writes tap directly into the raw buffer, provided by the user. The downside:
+the buffer returned by the "ondata" callback lives only for the scope of that callback,
+and must be copied by the user... 
+
+```lua
+-- assuming a client handle:
+
+local b = require 'buffer'
+
+client.onrawdata(function(chunk)
+   -- chunk is a Buffer object (https://github.com/clementfarabet/buffer)
+   print(chunk)
+
+   -- chunk will not be valid past this point, so its content must be copied, 
+   -- not just referenced...
+   local safe = chunk:clone()
+   -- safe can be past around...
+
+   -- the most common use is to copy that chunk into an existing storage,
+   -- for instance a tensor:
+   -- (assuming tensor is a torch.Tensor)
+   local dst = b(tensor)  -- creates a destination buffer on the tensor (a view, no copy)
+   dst:copy(src)
+end)
+
+-- write() also accepts buffers:
+client.write( b'this is a string saved in a buffer object' )
+
+-- last, the sync() interface can be set up in raw mode:
+client.syncraw()
+local buffer = client.read()
+-- ...
+```
