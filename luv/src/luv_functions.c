@@ -748,10 +748,7 @@ static void luv_on_read_raw(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
   if (nread >= 0) {
 
     if (luv_get_callback(L, "ondata")) {
-      char *data = malloc(sizeof(char) * nread);
-      memcpy((void *) data, (void *) buf.base, nread);
-
-      lua_pushnumber(L, (long) data);
+      lua_pushnumber(L, (long) buf.base);
       lua_pushnumber(L, nread);
       luv_call(L, 3, 0);
     }

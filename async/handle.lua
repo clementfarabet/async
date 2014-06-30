@@ -38,7 +38,7 @@ local function handle(client)
 
    h.onrawdata = function(cb)
       client.ondata = function(self,data, len)
-         local buf = b(len,data, true)
+         local buf = b(len,data)
          if cb then cb(buf) end
       end
       uv.read_start_raw(client)
