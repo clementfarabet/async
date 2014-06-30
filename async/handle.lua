@@ -1,5 +1,7 @@
 -- c lib / bindings for libuv
 local uv = require 'luv'
+local b = require 'buffer'
+local ffi = require 'ffi'
 
 -- we need penlight for a few convenience functions
 require 'pl'
@@ -33,6 +35,16 @@ local function handle(client)
       uv.read_start(client)
       h.reading = true
    end
+
+   h.onrawdata = function(cb)
+      client.ondata = function(self,data, len)
+         local buf = b(len,data, true)
+         if cb then cb(buf) end
+      end
+      uv.read_start_raw(client)
+      h.reading = true
+   end
+
    h.onerr = function(cb)
       client.onerr = function(self,code)
          if cb then cb(code) end
@@ -54,8 +66,20 @@ local function handle(client)
          if cb then cb() end
       end
    end
+
+   local refs = {}
+
    h.write = function(data,cb)
-      uv.write(client, data, cb)
+      if type(data) == "table" then
+         refs[data.ctype] = data -- make sure buffer isnt GCed
+
+         uv.write_raw(client, tonumber(ffi.cast("long", data.ctype)), data.length, function(...)
+            refs[data.ctype] = nil
+            if cb then cb(...) end
+         end)
+      else
+         uv.write(client, data, cb)
+      end
    end
    h.close = function(cb)
       uv.shutdown(client, function()
