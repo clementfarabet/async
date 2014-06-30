@@ -257,6 +257,42 @@ local function handle(client)
          return h.readsplit('\n')
       end
    end
+   
+   -- activate sync read with raw mode (buffers instead of strings)
+   h.syncraw = function()
+      -- local buffers:
+      local fibers = {}
+      local data = {}
+
+      -- capture all data:
+      h.onrawdata(function(d)
+         local cfibers = fibers
+         fibers = {}
+         for f in pairs(cfibers) do
+            data[f] = d
+            f.resume()
+         end
+      end)
+
+      -- synchronous read:
+      h.read = function()
+         -- get coroutine:
+         local f = fiber.context()
+         if not f then
+            print('read() can only be used within a fiber(function() client.read() end) context')
+            return nil
+         end
+         fibers[f] = true
+
+         -- yield
+         f.yield()
+
+         -- coroutine has been resumed, data is available
+         local d = data[f]
+         data[f] = nil
+         return d
+      end
+   end
 
    return h
 end
