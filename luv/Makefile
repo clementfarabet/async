@@ -1,10 +1,10 @@
 uname_S=$(shell uname -s)
 ifeq (Darwin, $(uname_S))
-  CFLAGS=-Ilibuv/include -O3 -I/usr/local/include/luajit-2.0 -DLUV_STACK_CHECK -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Wall -Werror -fPIC
-  LIBS=-lm -lluajit -framework CoreServices -framework Cocoa -L/usr/local/lib/
+  CFLAGS=-Ilibuv/include -O3 -I ${LUA_INCDIR} -DLUV_STACK_CHECK -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Wall -Werror -fPIC
+  LIBS=-lm -lluajit -framework CoreServices -framework Cocoa -L ${LUA_LIBDIR}
   SHARED_LIB_FLAGS=-bundle -o luv.so temp/luv.o libuv/libuv.a temp/common.o
 else
-  CFLAGS=-Ilibuv/include -O3 -I/usr/local/include/luajit-2.0 -DLUV_STACK_CHECK -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Wall -Werror -fPIC
+  CFLAGS=-Ilibuv/include -O3 -I ${LUA_INCDIR} -DLUV_STACK_CHECK -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Wall -Werror -fPIC
   LIBS=-lm -lrt
   SHARED_LIB_FLAGS=-shared -o luv.so temp/luv.o libuv/libuv.a temp/common.o
 endif
