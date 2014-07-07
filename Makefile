@@ -3,10 +3,10 @@ LUA=luajit
 all: lhttp_parser/lhttp_parser.so luv/luv.so
 
 lhttp_parser/lhttp_parser.so:
-	$(MAKE) -C lhttp_parser
+	$(MAKE) -C lhttp_parser  LUA_BINDIR=$(LUA_BINDIR)  LUA_LIBDIR=$(LUA_LIBDIR)  LUA_INCDIR=$(LUA_INCDIR)
 
 luv/luv.so: luv/Makefile
-	$(MAKE) -C luv
+	$(MAKE) -C luv  LUA_BINDIR=$(LUA_BINDIR)  LUA_LIBDIR=$(LUA_LIBDIR)  LUA_INCDIR=$(LUA_INCDIR)
 
 clean:
 	$(MAKE) -C lhttp_parser clean
