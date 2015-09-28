@@ -88,44 +88,81 @@ function http.listen(domain, handler)
          end,
          onHeadersComplete = function (info)
             request = info
-	    
-	    if request.should_keep_alive then    
-	       -- For a persistent connection, all messages must have
-	       -- a self-defined length (not one defined by closure of
-	       -- the connection)
-	       headers['Content-Length']=#body -- TODO: luvit uses #chunk but not sure where chunk is defined
-	       
-	       if info.version_minor < 1 then -- HTTP/1.0: insert Connection: keep-alive
-	          headers['connection']='keep-alive'
-	       end
-	    else
-	       if info.version_minor >= 1 then -- HTTP/1.1+: insert Connection: close for last msg
-		  headers['connection']='close'
-	       end
-	    end
+
+            if request.should_keep_alive then
+               -- For a persistent connection, all messages must have
+               -- a self-defined length (not one defined by closure of
+               -- the connection)
+               headers['Content-Length']=#body -- TODO: luvit uses #chunk but not sure where chunk is defined
+
+               if info.version_minor < 1 then -- HTTP/1.0: insert Connection: keep-alive
+                  headers['connection']='keep-alive'
+               end
+            else
+               if info.version_minor >= 1 then -- HTTP/1.1+: insert Connection: close for last msg
+                  headers['connection']='close'
+               end
+            end
          end,
          onBody = function (chunk)
             table.insert(body, chunk)
          end,
          onMessageComplete = function ()
-	    request.body = table.concat(body)
+            request.body = table.concat(body)
             request.url = lurl
             request.headers = headers
             request.parser = parser
-            request.socket = request.socket
             keepAlive = request.should_keep_alive
 
-	    if request.method == 'POST' and request.headers['content-type'] == "application/json" then
-	       local ok, j = pcall(json.decode, request.body)
-	       if ok then request.body = j end
-	    end
+            -- Flush the body when complete
+            body = {}
+
+            -- Parse body:
+            -- TODO: these decoders should be abstracted in a separate file/func, and done as chunks come in
+            if request.method == 'POST' and request.headers['content-type'] and request.headers['content-type']:find("^multipart%/form%-data") then
+               -- Multipart form, decode:
+               local _,_,boundary = request.headers['content-type']:find("^multipart%/form%-data%; boundary%=(.*)")
+               local elts = stringx.split(request.body, boundary)
+               request.body = {}
+               for i = 2,#elts-1 do
+                  -- Parse content disposition:
+                  local _,_,type,data = elts[i]:find('..Content%-Disposition%:%s*(.-)%;%s*(.*)\r\n%-%-$')
+
+                  -- Parse form data
+                  if type == 'form-data' then
+                     local _,last,name,fname = data:find('name="(.-)"(.-)\r\n')
+                     local _,_,filename = fname:find('filename="(.-)"$')
+                     data = data:sub(last+1,#data)
+                     local _,last,contentType = data:find('^Content%-Type:%s*(.-)\r\n')
+                     if contentType then
+                        data = data:sub(last+1,#data)
+                     end
+                     data = data:sub(3,#data)
+                     request.body[name] = {
+                        data = data,
+                        filename = filename,
+                        ['content-type'] = contentType,
+                     }
+                  else
+                     table.insert(request.body, {
+                        type = type,
+                        data = data,
+                     })
+                  end
+               end
+            elseif request.method == 'POST' then --and request.headers['content-type'] == "application/json" then
+               -- Always try to default to JSON for body, even if content-type not specified
+               local ok, j = pcall(json.decode, request.body)
+               if ok then request.body = j end
+
+            end
 
             -- headers ready? -> call user handler
             handler(request, function(body,headers,statusCode)
                -- Code:
                local statusCode = statusCode or 200
                local reasonPhrase = http.codes[statusCode]
-               
+
                -- Body length:
                if type(body) == "table" then
                   body = table.concat(body)
@@ -146,7 +183,8 @@ function http.listen(domain, handler)
                      table.insert(head, value)
                      table.insert(head, "\r\n")
                   else
-                     table.insert(head, string.format("%s: %s\r\n", key, value))
+                     local entry = string.format("%s: %s\r\n", key, value)
+                     table.insert(head, entry)
                   end
                end
 
@@ -158,12 +196,12 @@ function http.listen(domain, handler)
                -- Keep alive?
                if keepAlive then
                   parser:reinitialize('request')
-		  
+
                   -- Rather than close a keep-alive connection, we leave the socket open
-		  -- to maintain the persistent connection. The client (browser) will time
-		  -- out after inactivity (http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
-		  -- To test that sockets are closed after the timeout, compare the output of this command:
-		  -- lsof -n | grep -i "luajit" | grep "http-alt" [optional: | grep -c "ESTABLISHED" for count]
+                  -- to maintain the persistent connection. The client (browser) will time
+                  -- out after inactivity (http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
+                  -- To test that sockets are closed after the timeout, compare the output of this command:
+                  -- lsof -n | grep -i "luajit" | grep "http-alt" [optional: | grep -c "ESTABLISHED" for count]
                   parser:finish()
                else
                   parser:finish()

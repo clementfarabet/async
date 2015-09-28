@@ -1,7 +1,7 @@
 -- c lib / bindings for libuv
 local uv = require 'luv'
-local b = require 'buffer'
-local ffi = require 'ffi'
+local ok,b = pcall(require, 'buffer')
+local ok,ffi = pcall(require, 'ffi')
 
 -- we need penlight for a few convenience functions
 require 'pl'
@@ -191,7 +191,7 @@ local function handle(client)
             lines[f] = tablex.sub(lines[f],2,#lines[f])
             return line
          end
-     
+
          -- splitter function:
          local splitter
          if type(split) == 'function' then
@@ -204,7 +204,7 @@ local function handle(client)
             end
          else
             splitter = function(chunk)
-               -- stringx.split returns "" as placeholders when it 
+               -- stringx.split returns "" as placeholders when it
                -- detects the split in either first or last position.
                local chunks = stringx.split(chunk,split)
                return chunks
@@ -257,7 +257,7 @@ local function handle(client)
          return h.readsplit('\n')
       end
    end
-   
+
    -- activate sync read with raw mode (buffers instead of strings)
    h.syncraw = function()
       -- local buffers:

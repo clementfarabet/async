@@ -46,9 +46,9 @@ local context = function()
 end
 
 -- wait:
-wait = function(funcs,args,limit,cb)
+local wait = function(funcs,args,limit,cb)
    -- current fiber:
-   local f = context(f)
+   local f = context()
 
    if type(limit) == 'function' then
       cb = limit
@@ -100,7 +100,7 @@ wait = function(funcs,args,limit,cb)
          index = index + 1
       end
    end
-   
+
    -- return results
    if #results == 1 then
       return unpack(results[1])
@@ -109,10 +109,15 @@ wait = function(funcs,args,limit,cb)
    end
 end
 
+-- sleep
+local function sleep(millis)
+   wait(require('async.time').setTimeout, {millis})
+end
+
 -- sync: magic wrapper that transforms any function into a syncable one
 local function sincify(self,key)
    local async = require 'async'
-   local afunc = async[key] or async.process[key] or async.fs[key] or async.time[key]
+   local afunc = async[key] or async.process[key] or async.fs[key] or async.curl[key]
    return function(...)
       return wait(afunc, {...})
    end
@@ -127,6 +132,7 @@ local pkg = {
    new = fiber,
    fibers = fibers,
    context = context,
+   sleep = sleep,
    wait = wait,
    sync = sync,
 }

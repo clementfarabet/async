@@ -16,9 +16,13 @@ return {
    fs = require('async.fs'),
    json = require('async.json'),
    http = require('async.http'),
+   url = require('async.url'),
+   curl = require('async.curl'),
+   flow = require('async.flow'),
    process = require('async.process'),
    pcall = require('async.pcall'),
    go = function(fn)
+      -- Optional function to schedule at every event loop:
       if fn then
          local to = require('async.time').setTimeout
          local function cycle()
@@ -27,6 +31,12 @@ return {
          end
          cycle()
       end
+      -- Start event loop:
+      require('luv').run('default')
+   end,
+   run = function(fn)
+      -- Run code within a fiber:
+      require('async.fiber')(fn)
       require('luv').run('default')
    end,
 }

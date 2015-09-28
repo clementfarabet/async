@@ -1,6 +1,6 @@
 local async = require 'async'
 
-async.json.connect({host='localhost', port=8483}, function(client)
+async.json.connect({host='127.0.0.1', port=8483}, function(client)
    client.receive(function(res)
       print('response:',res)
    end)

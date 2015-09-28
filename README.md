@@ -109,7 +109,7 @@ A lower-level interface is also available, for C-level performance. The upside:
 no copy is done, the user callback gets the raw pointer to the network buffer (read)
 and writes tap directly into the raw buffer, provided by the user. The downside:
 the buffer returned by the "ondata" callback lives only for the scope of that callback,
-and must be copied by the user... 
+and must be copied by the user...
 
 ```lua
 -- assuming a client handle:
@@ -120,7 +120,7 @@ client.onrawdata(function(chunk)
    -- chunk is a Buffer object (https://github.com/clementfarabet/buffer)
    print(chunk)
 
-   -- chunk will not be valid past this point, so its content must be copied, 
+   -- chunk will not be valid past this point, so its content must be copied,
    -- not just referenced...
    local safe = chunk:clone()
    -- safe can be past around...
@@ -140,3 +140,60 @@ client.syncraw()
 local buffer = client.read()
 -- ...
 ```
+
+We also provide a simple async interface to CURL.
+
+Provides two functions: `get` and `post`.
+
+`get`:
+
+```lua
+-- simple URL:
+async.curl.get('http://www.google.com', function(res)
+    print(res)
+end)
+
+-- complete API:
+async.curl.get({
+    host = 'http://blogname.blogspot.com',
+    path = '/feeds/posts/default',
+    query = {
+        alt = 'json'
+    },
+    format = 'json' -- parses the output: json -> Lua table
+}, function(res)
+   print(res)
+end)
+
+-- Getting an image, and decoding it:
+curl.get('http://www.webstandards.org/files/acid2/reference.png', function(res)
+  local decoded = require('graphicsmagick').Image():fromString(res)
+end)
+```
+
+`post`:
+
+```lua
+-- post has the same API, with a form parameter (instead of query):
+async.curl.post({
+    host = 'http://myserver.com',
+    path = '/',
+    form = {
+        username = 'bob',
+        password = 'key',
+        somefiletoupload = '@/local/path/to/file.jpg'
+    }
+}, function(res)
+   print(res)
+end)
+
+-- or a simple file upload:
+async.curl.post({
+    host = 'http://myserver.com',
+    path = '/',
+    file = '@/path/to/file.png',
+}, function(res)
+   print(res)
+end)
+```
+

@@ -21,8 +21,10 @@ async.http.listen('http://0.0.0.0:8082/', function(req,res)
          ret = ret
       }
    end
-   
+
    res(resp, {['Content-Type']='text/html'})
 end)
+
+print('server listening to port 8082')
 
 async.go()

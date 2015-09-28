@@ -502,7 +502,7 @@ static void on_close(uv_handle_t* handle) {
   }
   luv_handle_t* lhandle = handle->data;
   luv_handle_unref(L, lhandle);
-   
+
   if (lhandle->ref != LUA_NOREF) {
     assert(lhandle->refCount);
 /*    fprintf(stderr, "WARNING: closed %s with %d extra refs lhandle=%p handle=%p\n", lhandle->type, lhandle->refCount, handle->data, handle);*/
@@ -523,7 +523,7 @@ static int luv_close(lua_State* L) {
   uv_handle_t* handle = luv_get_handle(L, 1);
 
   if (uv_is_closing(handle)) {
-    fprintf(stderr, "WARNING: Handle already closing \tlhandle=%p handle=%p\n", handle->data, handle);
+    /* fprintf(stderr, "WARNING: Handle already closing \tlhandle=%p handle=%p\n", handle->data, handle); */
     return 0;
   }
 
@@ -732,7 +732,7 @@ static void luv_on_read(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
         luv_call(L, 2, 0);
       }
     }
-  } 
+  }
 
   free(buf.base);
 #ifdef LUV_STACK_CHECK
@@ -770,7 +770,7 @@ static void luv_on_read_raw(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
         luv_call(L, 2, 0);
       }
     }
-  } 
+  }
 
   free(buf.base);
 #ifdef LUV_STACK_CHECK
