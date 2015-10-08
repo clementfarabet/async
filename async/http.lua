@@ -119,7 +119,8 @@ function http.listen(domain, handler)
 
             -- Parse body:
             -- TODO: these decoders should be abstracted in a separate file/func, and done as chunks come in
-            if request.method == 'POST' and request.headers['content-type'] and request.headers['content-type']:find("^multipart%/form%-data") then
+            if request.method == 'POST' and request.headers['content-type']
+	    and request.headers['content-type']:find("^multipart%/form%-data") then
                -- Multipart form, decode:
                local _,_,boundary = request.headers['content-type']:find("^multipart%/form%-data%; boundary%=(.*)")
                local elts = stringx.split(request.body, boundary)
@@ -150,11 +151,10 @@ function http.listen(domain, handler)
                      })
                   end
                end
-            elseif request.method == 'POST' then --and request.headers['content-type'] == "application/json" then
-               -- Always try to default to JSON for body, even if content-type not specified
+            elseif request.method == 'POST'
+	    and request.headers['content-type'] == "application/json" then
                local ok, j = pcall(json.decode, request.body)
                if ok then request.body = j end
-
             end
 
             -- headers ready? -> call user handler
@@ -176,8 +176,11 @@ function http.listen(domain, handler)
                headers = headers or {['Content-Type']='text/plain'}
                headers['Date'] = os.date("!%a, %d %b %Y %H:%M:%S GMT")
                headers['Server'] = 'ASyNC'
-               headers['Content-Length']=length
-               --headers["Connection"] = "close"
+	       if not (headers['Transfer-Encoding']
+		       and headers['Transfer-Encoding'] == 'chunked') then
+		  headers['Content-Length'] = length
+	       end
+
                for key, value in pairs(headers) do
                   if type(key) == "number" then
                      table.insert(head, value)
@@ -197,17 +200,20 @@ function http.listen(domain, handler)
                if keepAlive then
                   parser:reinitialize('request')
 
-                  -- Rather than close a keep-alive connection, we leave the socket open
-                  -- to maintain the persistent connection. The client (browser) will time
-                  -- out after inactivity (http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
-                  -- To test that sockets are closed after the timeout, compare the output of this command:
-                  -- lsof -n | grep -i "luajit" | grep "http-alt" [optional: | grep -c "ESTABLISHED" for count]
+                  --[[ Rather than close a keep-alive connection, we leave the
+		     socket open to maintain the persistent connection. 
+		     The client (browser) will time out after inactivity 
+		     (http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
+		     To test that sockets are closed after the timeout, 
+		     compare the output of this command:
+		     lsof -n | grep -i "luajit" | grep "http-alt" [optional: | grep -c "ESTABLISHED" for count]
+		  ]]--
                   parser:finish()
                else
                   parser:finish()
                   client.close()
                end
-            end)
+            end, client) -- give the raw client socket as the last argument
          end
       })
 
