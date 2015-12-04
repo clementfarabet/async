@@ -153,8 +153,8 @@ function http.listen(domain, handler)
                end
             elseif request.method == 'POST'
 	    and request.headers['content-type'] == "application/json" then
-               local ok, j = pcall(json.decode, request.body)
-               if ok then request.body = j end
+                local ok, j = pcall(json.decode, request.body)
+                if ok then request.body = j end
             end
 
             -- headers ready? -> call user handler
@@ -201,10 +201,10 @@ function http.listen(domain, handler)
                   parser:reinitialize('request')
 
                   --[[ Rather than close a keep-alive connection, we leave the
-		     socket open to maintain the persistent connection. 
-		     The client (browser) will time out after inactivity 
+		     socket open to maintain the persistent connection.
+		     The client (browser) will time out after inactivity
 		     (http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
-		     To test that sockets are closed after the timeout, 
+		     To test that sockets are closed after the timeout,
 		     compare the output of this command:
 		     lsof -n | grep -i "luajit" | grep "http-alt" [optional: | grep -c "ESTABLISHED" for count]
 		  ]]--
@@ -220,7 +220,9 @@ function http.listen(domain, handler)
       -- Pipe data into parser:
       client.ondata(function(chunk)
          -- parse chunk:
-         parser:execute(chunk,0,#chunk)
+         if #chunk > 0 then
+             parser:execute(chunk,0,#chunk)
+         end
       end)
    end)
 end
