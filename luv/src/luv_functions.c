@@ -1413,7 +1413,11 @@ static int luv_spawn(lua_State* L) {
   stdio[2].data.stream = (uv_stream_t*)stderr_pipe;
 
   /* Parse the args array */
+#if LUA_VERSION_NUM>= 502
+  size_t argc = lua_rawlen(L, 2) + 1;
+#else
   size_t argc = lua_objlen(L, 2) + 1;
+#endif
   char** args = malloc((argc + 1) * sizeof(char*));
   args[0] = strdup(command);
   size_t i;
@@ -1435,7 +1439,11 @@ static int luv_spawn(lua_State* L) {
   lua_getfield(L, 3, "env");
   env = NULL;
   if (lua_type(L, -1) == LUA_TTABLE) {
+#if LUA_VERSION_NUM>= 502
+    argc = lua_rawlen(L, -1);
+#else
     argc = lua_objlen(L, -1);
+#endif
     env = malloc((argc + 1) * sizeof(char*));
     for (i = 0; i < argc; i++) {
       lua_rawgeti(L, -1, i + 1);
